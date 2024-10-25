@@ -1,0 +1,35 @@
+name: Build Marshalsec
+
+on:
+  workflow_dispatch:  # 只保留手动触发
+    inputs:
+      jdk_version:
+        description: 'JDK 8 version'
+        required: true
+        default: '8.0.392+8'  # Temurin (AdoptOpenJDK) 最新的 JDK 8 LTS 版本
+        type: string
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        repository: 'mbechler/marshalsec'
+        
+    - name: Set up JDK 8
+      uses: actions/setup-java@v3
+      with:
+        java-version: '8.0.392+8'  # 明确指定 JDK 版本
+        distribution: 'temurin'     # 使用 Eclipse Temurin (原 AdoptOpenJDK)
+        cache: maven
+        
+    - name: Build with Maven
+      run: mvn -B clean package
+        
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: marshalsec-jar
+        path: target/marshalsec-*-all.jar
