@@ -3,15 +3,22 @@ name: Build Marshalsec
 on:
   workflow_dispatch:
     inputs:
-      jdk_version:
-        description: 'JDK 8 version'
+      release_tag:
+        description: 'Release tag (e.g. v1.0.0)'
         required: true
-        default: '8.0.392+8'
+        default: 'v1.0.0'
+        type: string
+      release_title:
+        description: 'Release title'
+        required: true
+        default: 'Marshalsec Release'
         type: string
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # 需要写入权限来创建 release
     
     steps:
     - uses: actions/checkout@v3
@@ -28,11 +35,19 @@ jobs:
     - name: Build with Maven (Skip Tests)
       run: mvn -B clean package -DskipTests
         
-    - name: Upload artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: marshalsec-jar
-        path: target/marshalsec-*-all.jar
-        
     - name: List generated files
       run: ls -la target/
+        
+    - name: Create Release
+      id: create_release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ github.event.inputs.release_tag }}
+        name: ${{ github.event.inputs.release_title }}
+        draft: false
+        prerelease: false
+        files: |
+          target/marshalsec-*-all.jar
+        generate_release_notes: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
