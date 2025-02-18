@@ -3,7 +3,7 @@ name: Build Marshalsec
 on:
   push:
     branches:
-      - main # 或其他主分支
+      - master # 或其他主分支
     paths:
       - '**/*' # 监测所有文件变更，也可以根据需要调整
 
