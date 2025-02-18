@@ -1,14 +1,13 @@
 name: Build Marshalsec
 
 on:
-  push:
-    branches:
-      - master  # 监控 master 分支的提交
-    paths:
-      - '**/*'  # 监控所有文件变更，也可以根据需要调整
-
   workflow_dispatch:
     inputs:
+      release_tag:
+        description: 'Release tag (e.g. v1.0.0)'
+        required: true
+        default: 'v1.0.0'
+        type: string
       release_title:
         description: 'Release title'
         required: true
@@ -19,20 +18,13 @@ jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: write  # 需要写入权限来创建 release
+      contents: write # 需要写入权限来创建 release
     
     steps:
-    - name: Checkout Marshalsec repository
-      uses: actions/checkout@v3
+    - uses: actions/checkout@v3
       with:
-        repository: 'mbechler/marshalsec'  # 检出 mbechler/marshalsec 仓库
-    
-    - name: Get the latest commit SHA (first 7 characters)
-      id: get_sha
-      run: |
-        COMMIT_SHA=$(git rev-parse --short=7 HEAD)  # 获取最新 commit 的前 7 位 SHA
-        echo "commit_sha=$COMMIT_SHA" >> $GITHUB_ENV  # 保存 SHA 为环境变量
-    
+        repository: 'mbechler/marshalsec'
+        
     - name: Set up JDK 8
       uses: actions/setup-java@v3
       with:
@@ -50,12 +42,12 @@ jobs:
       id: create_release
       uses: softprops/action-gh-release@v1
       with:
-        tag_name: ${{ env.commit_sha }}  # 使用前 7 位 commit SHA 作为版本标签
-        name: Marshalsec Release ${{ env.commit_sha }}  # 使用前 7 位 commit SHA 作为发布名称
+        tag_name: ${{ github.event.inputs.release_tag }}
+        name: ${{ github.event.inputs.release_title }}
         draft: false
         prerelease: false
         files: |
-          target/marshalsec-0.0.3-SNAPSHOT-all.jar  # 修改为实际生成的文件名
+          target/marshalsec-*-all.jar
         generate_release_notes: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
