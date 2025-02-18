@@ -1,18 +1,11 @@
 name: Build Marshalsec
 
 on:
-  workflow_dispatch:
-    inputs:
-      release_tag:
-        description: 'Release tag (e.g. v1.0.0)'
-        required: true
-        default: 'v1.0.0'
-        type: string
-      release_title:
-        description: 'Release title'
-        required: true
-        default: 'Marshalsec Release'
-        type: string
+  push:
+    branches:
+      - main # 或其他主分支
+    paths:
+      - '**/*' # 监测所有文件变更，也可以根据需要调整
 
 jobs:
   build:
@@ -24,7 +17,7 @@ jobs:
     - uses: actions/checkout@v3
       with:
         repository: 'mbechler/marshalsec'
-        
+    
     - name: Set up JDK 8
       uses: actions/setup-java@v3
       with:
@@ -42,12 +35,12 @@ jobs:
       id: create_release
       uses: softprops/action-gh-release@v1
       with:
-        tag_name: ${{ github.event.inputs.release_tag }}
-        name: ${{ github.event.inputs.release_title }}
+        tag_name: ${{ github.sha }}  # 使用当前 commit 的 SHA 作为版本标签
+        name: Marshalsec Release ${{ github.sha }}  # 使用 commit SHA 作为发布名称
         draft: false
         prerelease: false
         files: |
-          target/marshalsec-*-all.jar
+          target/marshalsec-${{ github.sha }}-all.jar  # 将生成的文件名附加上 commit SHA
         generate_release_notes: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
