@@ -50,12 +50,12 @@ jobs:
       id: create_release
       uses: softprops/action-gh-release@v1
       with:
-        tag_name: ${{ env.commit_sha }}  # 使用从 mbechler/marshalsec 获取的前 7 位 commit SHA 作为版本标签
+        tag_name: ${{ env.commit_sha }}  # 使用前 7 位 commit SHA 作为版本标签
         name: Marshalsec Release ${{ env.commit_sha }}  # 使用前 7 位 commit SHA 作为发布名称
         draft: false
         prerelease: false
         files: |
-          target/marshalsec-${{ env.commit_sha }}-all.jar  # 使用 commit SHA 作为文件名的一部分
+          target/marshalsec-0.0.3-SNAPSHOT-all.jar  # 修改为实际生成的文件名
         generate_release_notes: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
